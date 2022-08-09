@@ -36,7 +36,9 @@ class GAMOperations:
         self.create_params = {k:kwargs[k] for k in self.create_fields if k in kwargs} \
           if self.create_fields else self.params
 
-    def create(self, atts: List[dict], validate: bool=False, verbose: bool=True) -> List[dict]:
+    def create(self, atts: List[dict]=None, validate: bool=False, verbose: bool=True) -> List[dict]:
+        if not atts:
+            atts = [self.create_params]
         logger.log(VERBOSE2, _CREATE_LOG_LINE, type(self).__name__, pformat(self.log_recs(atts)))
         results = self.dry_run_recs(atts) if self.dry_run else \
           getattr(self.svc(), self.create_method)(atts)
@@ -45,6 +47,10 @@ class GAMOperations:
         if validate:
             self.validate(atts, results)
         return results
+    
+    def createone(self, **kwargs) -> dict:
+        recs = self.create(**kwargs)
+        return recs[0] if recs else {}
 
     def fetch(self, one: bool=False, create: bool=False, recs: List[dict]=None,
               validate: bool=False) -> List[dict]:
@@ -56,7 +62,7 @@ class GAMOperations:
             if new_recs:
                 results += self.create(new_recs, verbose=False)
         elif create and not results:
-            results = self.create([self.create_params], verbose=False)
+            results = self.create(verbose=False)
         logger.log(VERBOSE2, _RESULTS_LOG_LINE, self.service, self.method, pformat(results))
         if validate:
             self.validate(recs, results)

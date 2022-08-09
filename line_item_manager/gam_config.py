@@ -12,7 +12,7 @@ import pytz
 from .config import config, VERBOSE1, VERBOSE2
 from .exceptions import ResourceNotActive, ResourceNotFound
 from .operations import Advertiser, AdUnit, Placement, TargetingKey, TargetingValues, \
-     CreativeBanner, CreativeVideo, Order, CurrentNetwork, CurrentUser, LineItem, LICA
+     CreativeBanner, CreativeVideo, Order, CurrentNetwork, CurrentUser, LineItem, LICA, User
 from .prebid import PrebidBidder
 from .template import render_cfg, render_src
 from .utils import format_long_list, ichunk
@@ -57,6 +57,7 @@ class GAMLineItems:
         self._line_items: Optional[List[dict]] = None
         self._order: Optional[dict] = None
         self._targeting_key: Optional[dict] = None
+        self._trafficker: Optional[dict] = None
 
         self.gam: GAMConfig = gam
         self.media_type = media_type
@@ -136,7 +137,7 @@ class GAMLineItems:
             snippet=cfg['banner']['snippet'],
             isSafeFrameCompatible=cfg['banner'].get('safe_frame', True),
         )
-        return CreativeBanner(**params).fetchone(create=True)
+        return CreativeBanner(**params).createone(verbose=False)
 
     def creative_video(self, _: int, cfg: dict, size: dict) -> dict:
         params = dict(
@@ -174,7 +175,7 @@ class GAMLineItems:
                              cpm_min=self.cpms[0], cpm_max=self.cpms[-1])
             log('order', obj=cfg)
             self._order = Order(name=cfg['name'], advertiserId=self.advertiser['id'],
-                                traffickerId=self.gam.user['id']).fetchone(create=True)
+                                traffickerId=self.trafficker['id']).fetchone(create=True)
         return self._order
 
     @property
@@ -184,6 +185,26 @@ class GAMLineItems:
             self._targeting_key = target_fetch(
                 self.bidder.targeting_key, config.cpm_names(), reportableType=reportableType)
         return self._targeting_key
+    
+    @property
+    def trafficker(self) -> dict:
+        if self._trafficker is None:
+            cfg = config.user.get('trafficker')
+            if cfg.get('email'):
+                self._trafficker = User(email=cfg['email']).fetchone()
+                if not 'id' in self._trafficker:
+                    raise ResourceNotFound(f"Trafficker with email '{cfg['email']}' was not found")
+            elif cfg.get('id'):
+                self._trafficker = User(id=cfg['id']).fetchone()
+                if not 'id' in self._trafficker:
+                    raise ResourceNotFound(f"Trafficker with id {cfg['id']} was not found")
+            elif cfg.get('name'):
+                self._trafficker = User(name=cfg['name']).fetchone()
+                if not 'id' in self._trafficker:
+                    raise ResourceNotFound(f"Trafficker with name '{cfg['name']}' was not found")
+            else:
+                self._trafficker = self.gam.user
+        return self._trafficker
 
 class GAMConfig:
 

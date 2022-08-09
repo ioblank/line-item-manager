@@ -68,6 +68,23 @@ properties:
         - "id"
       - required:
         - "name"
+  trafficker:
+    type: "object"
+    additionalProperties: False
+    properties:
+      email:
+        type: "string"
+      id:
+        type: "number"
+      name:
+        type: "string"
+    anyOf:
+      - required:
+        - "email"
+      - required:
+        - "id"
+      - required:
+        - "name"
   order:
     type: "object"
     additionalProperties: False
@@ -152,6 +169,23 @@ properties:
     required:
       - "currency"
       - "granularity"
+  bidder_aliases:
+    type: "array"
+    minItems: 1
+    items:
+      type: "object"
+      additionalProperties: False
+      properties:
+        base_code:
+          type: "string"
+        alias_code:
+          type: "string"
+        alias_name:
+          type: "string"
+      required:
+        - base_code
+        - alias_code
+        - alias_name
 required:
   - "advertiser"
   - "order"

@@ -190,3 +190,8 @@ class TargetingValues(AppOperations):
     def __init__(self, *args, key_id: int=None, **kwargs):
         kwargs['customTargetingKeyId'] = key_id
         super().__init__(*args, **kwargs)
+
+class User(AppOperations):
+    service = 'UserService'
+    method = 'getUsersByStatement'
+    query_fields = ('email', 'id', 'name', 'roleId', 'rolename', 'status')
