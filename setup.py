@@ -13,11 +13,10 @@ readme = get_txt('README.rst') if os.path.isfile('README.rst') else ''
 history = get_txt('HISTORY.rst') if os.path.isfile('HISTORY.rst') else ''
 
 requirements = [
-    'backports-datetime-fromisoformat==1.0.0',
     'Click==7.1.2',
     'googleads==25.0.0',
-    'jinja2==2.11.3',
-    'jsonschema==3.2.0',
+    'jinja2==3.0.3',
+    'jsonschema==4.4.0',
     'PyYAML>=5.4',
     'retrying==1.3.3',
     'tqdm==4.56.0',
@@ -36,28 +35,27 @@ release_requirements = [
 setup_requirements = []
 
 test_requirements = [
-    'coverage==5.3',
     'flake8==3.8.4',
     'mock==4.0.2',
-    'pytest==6.1.2',
-    'pytest-cov==2.10.1',
-    'pytest-runner==5.3.0',
+    'pytest==7.0.0',
+    'pytest-cov==3.0.0',
+    'pytest-runner==5.3.1',
  ]
 
 setup(
     author="the prebid contributors",
     author_email='info@prebid.org',
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     description="Create and manage line items.",
     entry_points={
@@ -81,6 +79,6 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     url='https://github.com/prebid/line-item-manager',
-    version='0.2.3',
+    version='0.2.8',
     zip_safe=False,
 )

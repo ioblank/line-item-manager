@@ -144,10 +144,17 @@ class Config:
     def pre_create(self) -> None:
         li_ = self.user['line_item']
         is_standard = li_['item_type'].upper() == "STANDARD"
+        is_sponsorship = li_['item_type'].upper() == "SPONSORSHIP"
         end_str = li_.get('end_datetime')
         start_str = li_.get('start_datetime')
         fmt = self.app['mgr']['date_fmt']
         vcpm = self.user['rate'].get('vcpm')
+
+        if self.user['creative'].get('video'):
+            for i_ in ('max_duration', ):
+                max_duration = self.user['creative']['video'].setdefault(
+                    i_, self.app['prebid']['creative']['video'][i_])
+            _ = self.user['creative']['video'].setdefault('duration', max_duration)
 
         if vcpm and not is_standard:
             raise ValueError("Specifying 'vcpm' requires using line item type 'standard'")
@@ -168,9 +175,10 @@ class Config:
             unlimited_end_dt=not end_str,
         ))
 
-        li_.update({'goal': dict(
-            goalType="NONE",
-        )})
+        if not is_sponsorship:
+            li_.update({'goal': dict(
+                goalType="NONE",
+            )})
 
         if vcpm:
             li_.update({'goal': dict(

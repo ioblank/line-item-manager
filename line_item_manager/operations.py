@@ -116,7 +116,7 @@ class CreativeVideo(Creative):
                      'vastRedirectType', 'duration')
 
     def __init__(self, *args, xsi_type: str='VastRedirectCreative', vastRedirectType: str='LINEAR',
-                 duration: int=config.app['prebid']['creative']['video']['duration'], **kwargs):
+                 duration: int=config.app['prebid']['creative']['video']['max_duration'], **kwargs):
         kwargs['xsi_type'] = xsi_type
         kwargs['vastRedirectType'] = vastRedirectType
         kwargs['duration'] = duration
@@ -144,6 +144,7 @@ class CurrentUser(AppOperations):
 class LICA(AppOperations):
     service = 'LineItemCreativeAssociationService'
     create_method = 'createLineItemCreativeAssociations'
+    method = 'getLineItemCreativeAssociationsByStatement'
 
     def check(self, rec: dict) -> Tuple[int, int]:
         return (rec['lineItemId'], rec['creativeId'])
@@ -157,6 +158,12 @@ class Order(AppOperations):
     service = "OrderService"
     method = 'getOrdersByStatement'
     create_method = 'createOrders'
+    query_fields = ('id', 'name', 'advertiserId', 'traffickerId')
+
+    def __init__(self, *args, **kwargs):
+        if 'appliedTeamIds' in kwargs and kwargs['appliedTeamIds'] is None:
+            del kwargs['appliedTeamIds']
+        super().__init__(*args, **kwargs)
 
     def archive(self) -> dict:
         if self.dry_run:

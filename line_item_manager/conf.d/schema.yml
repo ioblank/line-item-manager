@@ -27,6 +27,12 @@ properties:
             $ref: "#/definitions/sizeArray"
           vast_xml_url:
             type: "string"
+          duration:
+            $ref: "#/definitions/positiveIntegerType"
+          max_duration:
+            $ref: "#/definitions/positiveIntegerType"
+          size_override:
+            type: "boolean"
         required:
           - "sizes"
           - "vast_xml_url"
@@ -91,6 +97,11 @@ properties:
     properties:
       name:
         type: "string"
+      appliedTeamIds:
+        type: "array"
+        minItems: 1
+        items:
+          type: "number"
     required:
       - "name"
   line_item:
@@ -103,6 +114,7 @@ properties:
         enum:
           - "price_priority"
           - "standard"
+          - "sponsorship"
       priority:
         $ref: "#/definitions/priorityType"
       start_datetime:
@@ -113,6 +125,18 @@ properties:
         format: "date-time"
       timezone:
         type: "string"
+      goal:
+          type: "object"
+          additionalProperties: False
+          properties:
+              units:
+                  type: "number"
+              goalType:
+                  type: "string"
+              unitType:
+                  type: "string"
+          required:
+              - "units"
     if:
       properties:
         item_type:
@@ -215,7 +239,6 @@ definitions:
   cpmType:
     type: "number"
     minimum: 0.01
-    multipleOf: 0.01
   granularityType:
     type: "object"
     additionalProperties: False
@@ -242,6 +265,9 @@ definitions:
       - 'auto'
       - 'dense'
       - 'custom'
+  positiveIntegerType:
+    type: "integer"
+    minimum: 1
   priorityType:
     type: "integer"
     minimum: 1

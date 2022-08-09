@@ -2,6 +2,10 @@ mgr:
   advertiser:
     type: "ADVERTISER"
   creative:
+    banner:
+      size_override: True
+    video:
+      size_override: False
     size_override:
       name_template: '{{ name }} Copy:{{ index }}'
   date_fmt: "%m/%d/%y %H:%M"
@@ -13,7 +17,7 @@ mgr:
   max_lica_records: 100
 
 googleads:
-  version: 'v202105'
+  version: 'v202108'
   line_items:
     micro_cent_factor: 1000000
     max_per_order: 450
@@ -39,12 +43,11 @@ prebid:
       name: "Top Bid"
     targeting_key: "hb_pb"
   creative:
-    banner:
-      size:
-        height: 1
-        width: 1
+    size_override:
+      height: 1
+      width: 1
     video:
-      duration: 1000 # milliseconds
+      max_duration: 30000 # milliseconds
   price_granularity:
     low:
       - min: 0.50

@@ -19,8 +19,6 @@ from .utils import format_long_list, ichunk
 
 logger = config.getLogger(__name__)
 
-BANNER_SIZE = config.app['prebid']['creative']['banner']['size']
-
 def is_create_retryable_error(exc: Exception) -> bool:
     is_error = isinstance(exc, GoogleAdsServerFault)
     if is_error:
@@ -71,8 +69,8 @@ class GAMLineItems:
 
     @property
     def is_size_override(self) -> bool:
-        return self.media_type == 'banner' and \
-          config.user['creative']['banner'].get('size_override', True)
+        default = config.app['mgr']['creative'][self.media_type]['size_override']
+        return config.user['creative'][self.media_type].get('size_override', default)
 
     @property
     def advertiser(self) -> dict:
@@ -133,18 +131,19 @@ class GAMLineItems:
         params = dict(
             name=self.creative_name(cfg, index),
             advertiserId=self.advertiser['id'],
-            size=BANNER_SIZE if self.is_size_override else size,
+            size=config.app['prebid']['creative']['size_override'] if self.is_size_override else size,
             snippet=cfg['banner']['snippet'],
             isSafeFrameCompatible=cfg['banner'].get('safe_frame', True),
         )
         return CreativeBanner(**params).createone(verbose=False)
 
-    def creative_video(self, _: int, cfg: dict, size: dict) -> dict:
+    def creative_video(self, index: int, cfg: dict, size: dict) -> dict:
         params = dict(
-            name=cfg['name'],
+            name=self.creative_name(cfg, index),
             advertiserId=self.advertiser['id'],
-            size=size,
+            size=config.app['prebid']['creative']['size_override'] if self.is_size_override else size,
             vastXmlUrl=cfg['video']['vast_xml_url'],
+            duration=config.user['creative']['video']['duration'],
         )
         return CreativeVideo(**params).fetchone(create=True)
 
@@ -174,8 +173,12 @@ class GAMLineItems:
             cfg = render_cfg('order', self.bidder, media_type=self.media_type,
                              cpm_min=self.cpms[0], cpm_max=self.cpms[-1])
             log('order', obj=cfg)
-            self._order = Order(name=cfg['name'], advertiserId=self.advertiser['id'],
-                                traffickerId=self.trafficker['id']).fetchone(create=True)
+            self._order = Order(
+                name=cfg['name'],
+                advertiserId=self.advertiser['id'],
+                traffickerId=self.trafficker['id'],
+                appliedTeamIds=config.user['order'].get('appliedTeamIds'),
+            ).fetchone(create=True)
         return self._order
 
     @property
@@ -185,7 +188,7 @@ class GAMLineItems:
             self._targeting_key = target_fetch(
                 self.bidder.targeting_key, config.cpm_names(), reportableType=reportableType)
         return self._targeting_key
-    
+
     @property
     def trafficker(self) -> dict:
         if self._trafficker is None:
